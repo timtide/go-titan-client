@@ -21,4 +21,4 @@ this package provides three functions
 
 ## License
 
-MIT © Juan Batiz-Benet
+MIT license

@@ -58,6 +58,7 @@ func (s *blockService) AddBlocks(ctx context.Context, bs []blocks.Block) error {
 // GetBlock retrieves a particular block from the service,
 // Getting it from the datastore using the key (hash).
 func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error) {
+	logger.Debugf("begin get block with cid [%s]", c.String())
 	if !c.Defined() {
 		return nil, ipld.ErrNotFound{Cid: c}
 	}
@@ -73,10 +74,12 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 	if downloadInfo.URL == "" || downloadInfo.Token == "" {
 		return nil, errors.New("data not fount")
 	}
+	logger.Debug("the IP address of the edge node is ", downloadInfo.URL)
 	data, err := util.RequestDataFromTitan(downloadInfo.URL, downloadInfo.Token, c)
 	if err != nil {
 		return nil, err
 	}
+	logger.Debug("block data download success")
 	block, err := blocks.NewBlockWithCid(data, c)
 	if err != nil {
 		return nil, err
@@ -88,6 +91,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 // the returned channel.
 // NB: No guarantees are made about order.
 func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
+	logger.Debug("start batch download block")
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
@@ -130,6 +134,7 @@ func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan block
 			wg.Add(1)
 			go func(cc context.Context, c cid.Cid, df api.DownloadInfo) {
 				defer wg.Done()
+				logger.Debugf("start download cid [%s] data from edge node [%s]", c.String(), df.URL)
 				data, err := util.RequestDataFromTitan(df.URL, df.Token, c)
 				if err != nil {
 					logger.Error(err.Error())
@@ -142,6 +147,7 @@ func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan block
 				}
 				select {
 				case ch <- block:
+					logger.Debugf("the cid [%s] data download success", block.Cid().String())
 					return
 				case <-cc.Done():
 					return

@@ -3,7 +3,6 @@ package titan_client
 import (
 	"context"
 	"github.com/ipfs/go-cid"
-	logging "github.com/ipfs/go-log/v2"
 	"testing"
 )
 
@@ -42,6 +41,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestTitanClient_GetBlock(t *testing.T) {
+	// set log level
+	err := NewLog().SetLevel("DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	c, err := cid.Decode("QmRdJtFocxnDYNYogxbaqHRgMPWytqpWK57D27fCfQ7Z3h")
 	if err != nil {
 		t.Error(err)
@@ -63,7 +68,7 @@ func TestTitanClient_GetBlock(t *testing.T) {
 
 func TestTitanClient_GetBlocksByScheduleMapping(t *testing.T) {
 	// set log level
-	err := logging.SetLogLevel("titan-client", "DEBUG")
+	err := NewLog().SetLevel("DEBUG")
 	if err != nil {
 		t.Error(err.Error())
 		return

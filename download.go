@@ -21,6 +21,7 @@ var DefaultBufSize = 1048576
 // note: remember to close after using
 // eg: defer reader.close()
 func GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
+	logger.Info("begin get reader with cid : ", cid.String())
 	bs, err := NewBlockService()
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func Download(ctx context.Context, cid cid.Cid, archive bool, compressLevel int,
 		Archive:     archive,
 		Compression: compressLevel,
 	}
-
+	logger.Debugf("%s%s", "download data to ", outPath)
 	return ow.Write(reader, outPath)
 }
 

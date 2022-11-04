@@ -4,11 +4,8 @@ import (
 	"context"
 	blocks "github.com/ipfs/go-block-format"
 	"github.com/ipfs/go-cid"
-	logging "github.com/ipfs/go-log/v2"
 	"titan-client/util"
 )
-
-var logger = logging.Logger("titan-client")
 
 type TitanClient interface {
 	// GetBlock gets the requested block.

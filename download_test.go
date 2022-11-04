@@ -9,6 +9,12 @@ import (
 )
 
 func TestDownload(t *testing.T) {
+	// set log level
+	err := NewLog().SetLevel("DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	ctx := context.Background()
 	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
 	if err != nil {
@@ -24,6 +30,12 @@ func TestDownload(t *testing.T) {
 }
 
 func TestGetReader(t *testing.T) {
+	// set log level
+	err := NewLog().SetLevel("DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
 	if err != nil {
 		t.Error(err)

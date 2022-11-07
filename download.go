@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
+	blocks "github.com/ipfs/go-block-format"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	md "github.com/ipfs/go-merkledag"
@@ -17,12 +18,58 @@ import (
 // DefaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.
 var DefaultBufSize = 1048576
 
+type Downloader interface {
+	// GetBlock gets the requested block.
+	GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error)
+
+	// GetBlocks The scheduler queries the corresponding
+	// edge node information according to the incoming value. Each value
+	// is assigned to the corresponding edge node for global optimization.
+	// schedule service mapping cid to edge node.
+	GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
+
+	// GetReader returns a read pipe
+	// note: remember to close after using
+	// eg: defer reader.close()
+	GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error)
+
+	// Download data from titan to the specified directory according to the cid
+	// archive: compress to tar file
+	// compressLevel: compress level, eg: gzip.NoCompression
+	Download(ctx context.Context, cid cid.Cid, archive bool, compressLevel int, outPath string) error
+}
+
+func NewDownloader() Downloader {
+	return &titanDownloader{}
+}
+
+type titanDownloader struct{}
+
+func (t *titanDownloader) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error) {
+	bs, err := newBlockService()
+	if err != nil {
+		return nil, err
+	}
+	return bs.GetBlock(ctx, c)
+}
+
+func (t *titanDownloader) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
+	ch := make(chan blocks.Block)
+	defer close(ch)
+	bs, err := newBlockService()
+	if err != nil {
+		logger.Error(err.Error())
+		return ch
+	}
+	return bs.GetBlocks(ctx, ks)
+}
+
 // GetReader returns a read pipe
 // note: remember to close after using
 // eg: defer reader.close()
-func GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
+func (t *titanDownloader) GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
 	logger.Info("begin get reader with cid : ", cid.String())
-	bs, err := NewBlockService()
+	bs, err := newBlockService()
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +90,8 @@ func GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int
 // Download data from titan to the specified directory according to the cid
 // archive: compress to tar file
 // compressLevel: compress level, eg: gzip.NoCompression
-func Download(ctx context.Context, cid cid.Cid, archive bool, compressLevel int, outPath string) error {
-	reader, err := GetReader(ctx, cid, archive, compressLevel)
+func (t *titanDownloader) Download(ctx context.Context, cid cid.Cid, archive bool, compressLevel int, outPath string) error {
+	reader, err := t.GetReader(ctx, cid, archive, compressLevel)
 	if err != nil {
 		return err
 	}

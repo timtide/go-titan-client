@@ -1,8 +1,9 @@
 package titan_client
 
-import logging "github.com/ipfs/go-log/v2"
-
-const systemName = "titan-client"
+import (
+	logging "github.com/ipfs/go-log/v2"
+	"titan-client/common"
+)
 
 var logger = NewLog().getLogger()
 
@@ -11,12 +12,7 @@ type log struct {
 }
 
 func NewLog() *log {
-	return &log{systemName: systemName}
-}
-
-// SetSystemName set your favorite name
-func (l *log) SetSystemName(systemName string) {
-	l.systemName = systemName
+	return &log{systemName: common.AppName}
 }
 
 // SetLevel set log level, eg: DEBUG, INFO, WARN, ERROR...

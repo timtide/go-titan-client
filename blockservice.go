@@ -16,17 +16,17 @@ import (
 	"titan-client/util"
 )
 
-// MultiAddrString domain name or multi address string
-const MultiAddrString = "/ip4/221.4.187.172/tcp/3456"
+// multiAddrString domain name or multi address string
+const multiAddrString = "/ip4/221.4.187.172/tcp/3456"
 
 type blockService struct {
 	schedulerURL string
 }
 
-// NewBlockService creates a BlockService with given datastore instance.
-func NewBlockService() (bserv.BlockService, error) {
+// newBlockService creates a BlockService with given datastore instance.
+func newBlockService() (bserv.BlockService, error) {
 	bs := &blockService{}
-	urls, err := util.TransformationMultiAddrStringsToUrl(MultiAddrString)
+	urls, err := util.TransformationMultiAddrStringsToUrl(multiAddrString)
 	if err != nil {
 		return nil, err
 	}

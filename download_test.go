@@ -4,8 +4,8 @@ import (
 	"compress/gzip"
 	"context"
 	"github.com/ipfs/go-cid"
+	"github.com/timtide/titan-client/util"
 	"testing"
-	"titan-client/util"
 )
 
 var keys = []string{

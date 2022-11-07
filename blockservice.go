@@ -12,8 +12,8 @@ import (
 	ipld "github.com/ipfs/go-ipld-format"
 	"github.com/linguohua/titan/api"
 	"github.com/linguohua/titan/api/client"
+	"github.com/timtide/titan-client/util"
 	"sync"
-	"titan-client/util"
 )
 
 // multiAddrString domain name or multi address string

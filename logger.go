@@ -2,7 +2,7 @@ package titan_client
 
 import (
 	logging "github.com/ipfs/go-log/v2"
-	"titan-client/common"
+	"github.com/timtide/titan-client/common"
 )
 
 var logger = NewLog().getLogger()

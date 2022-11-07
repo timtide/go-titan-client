@@ -3,8 +3,8 @@ package util
 import (
 	"fmt"
 	"github.com/ipfs/go-cid"
-	"titan-client/common"
-	http2 "titan-client/util/http"
+	"github.com/timtide/titan-client/common"
+	http2 "github.com/timtide/titan-client/util/http"
 )
 
 // RequestDataFromTitan connect Titan net by http get method

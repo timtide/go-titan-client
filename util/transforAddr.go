@@ -4,7 +4,7 @@ import (
 	"fmt"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr/net"
-	"titan-client/common"
+	"github.com/timtide/titan-client/common"
 )
 
 // TransformationMultiAddrStringsToUrl multi format address transfer to url

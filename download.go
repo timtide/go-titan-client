@@ -10,9 +10,9 @@ import (
 	files "github.com/ipfs/go-ipfs-files"
 	md "github.com/ipfs/go-merkledag"
 	unixFile "github.com/ipfs/go-unixfs/file"
+	"github.com/timtide/titan-client/util"
 	"io"
 	gopath "path"
-	"titan-client/util"
 )
 
 // DefaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.

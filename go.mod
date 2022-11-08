@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/ipfs/go-block-format v0.0.3
-	github.com/ipfs/go-blockservice v0.4.0
 	github.com/ipfs/go-cid v0.3.2
 	github.com/ipfs/go-ipfs-blockstore v1.2.0
 	github.com/ipfs/go-ipfs-exchange-interface v0.2.0
@@ -14,7 +13,7 @@ require (
 	github.com/ipfs/go-merkledag v0.8.0
 	github.com/ipfs/go-unixfs v0.4.1
 	github.com/ipfs/tar-utils v0.0.2
-	github.com/linguohua/titan v0.0.0-20221017122701-6d4941c28fd6
+	github.com/linguohua/titan v0.0.0-20221103041228-34cdc2c2678d
 	github.com/multiformats/go-multiaddr v0.7.0
 )
 
@@ -31,6 +30,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/ipfs/bbloom v0.0.4 // indirect
 	github.com/ipfs/go-bitfield v1.0.0 // indirect
+	github.com/ipfs/go-blockservice v0.4.0 // indirect
 	github.com/ipfs/go-datastore v0.5.1 // indirect
 	github.com/ipfs/go-ipfs-ds-help v1.1.0 // indirect
 	github.com/ipfs/go-ipfs-util v0.0.2 // indirect
@@ -72,4 +72,4 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
 
-replace github.com/linguohua/titan v0.0.0-20221017122701-6d4941c28fd6 => github.com/LMF709268224/titan v1.0.0
+// replace github.com/linguohua/titan v0.0.0-20221017122701-6d4941c28fd6 => github.com/LMF709268224/titan v1.0.0

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	blocks "github.com/ipfs/go-block-format"
-	bserv "github.com/ipfs/go-blockservice"
 	"github.com/ipfs/go-cid"
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
 	exchange "github.com/ipfs/go-ipfs-exchange-interface"
@@ -24,7 +23,7 @@ type blockService struct {
 }
 
 // newBlockService creates a BlockService with given datastore instance.
-func newBlockService() (bserv.BlockService, error) {
+func newBlockService() (*blockService, error) {
 	bs := &blockService{}
 	urls, err := util.TransformationMultiAddrStringsToUrl(multiAddrString)
 	if err != nil {

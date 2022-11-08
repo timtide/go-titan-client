@@ -7,13 +7,16 @@ import (
 	"errors"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
+	logging "github.com/ipfs/go-log/v2"
 	md "github.com/ipfs/go-merkledag"
 	unixFile "github.com/ipfs/go-unixfs/file"
-	"github.com/timtide/titan-client/blockservice"
+	"github.com/timtide/titan-client/common"
 	"github.com/timtide/titan-client/util"
 	"io"
 	gopath "path"
 )
+
+var logger = logging.Logger(common.AppName)
 
 // defaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.
 const defaultBufSize = 1048576
@@ -41,10 +44,7 @@ type titanDownloader struct{}
 // eg: defer reader.close()
 func (t *titanDownloader) GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
 	logger.Info("begin get reader with cid : ", cid.String())
-	bs, err := blockservice.NewBlockService()
-	if err != nil {
-		return nil, err
-	}
+	bs := NewBlockService()
 	ds := md.NewDAGService(bs)
 	nd, err := ds.Get(ctx, cid)
 	if err != nil {

@@ -4,13 +4,14 @@ import (
 	"compress/gzip"
 	"context"
 	"github.com/ipfs/go-cid"
+	logging "github.com/ipfs/go-log/v2"
+	"github.com/timtide/titan-client/common"
 	"github.com/timtide/titan-client/util"
 	"testing"
 )
 
 func TestTitanDownloader_Download(t *testing.T) {
-	// set log level
-	err := NewLog().SetLevel("DEBUG")
+	err := logging.SetLogLevel(common.AppName, "DEBUG")
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -31,7 +32,7 @@ func TestTitanDownloader_Download(t *testing.T) {
 
 func TestTitanDownloader_GetReader(t *testing.T) {
 	// set log level
-	err := NewLog().SetLevel("DEBUG")
+	err := logging.SetLogLevel(common.AppName, "DEBUG")
 	if err != nil {
 		t.Error(err.Error())
 		return

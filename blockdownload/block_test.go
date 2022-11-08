@@ -32,13 +32,18 @@ var keys = []string{
 	"QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL",
 }
 
-func TestBlock_GetBlock(t *testing.T) {
+func TestBlockGetter_GetBlock(t *testing.T) {
 	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	block, err := NewBlocker().GetBlock(context.Background(), c)
+	bg, err := NewBlockGetter()
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	block, err := bg.GetBlock(context.Background(), c)
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -58,7 +63,12 @@ func TestBlock_GetBlocks(t *testing.T) {
 		ks = append(ks, c)
 	}
 	t.Log("ks length : ", len(ks))
-	ch := NewBlocker().GetBlocks(context.Background(), ks)
+	bg, err := NewBlockGetter()
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	ch := bg.GetBlocks(context.Background(), ks)
 	var count int
 	for {
 		select {

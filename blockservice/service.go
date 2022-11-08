@@ -1,4 +1,4 @@
-package titan_client
+package blockservice
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
 	exchange "github.com/ipfs/go-ipfs-exchange-interface"
 	ipld "github.com/ipfs/go-ipld-format"
+	logging "github.com/ipfs/go-log/v2"
 	"github.com/linguohua/titan/api"
 	"github.com/linguohua/titan/api/client"
 	"github.com/timtide/titan-client/util"
@@ -18,12 +19,14 @@ import (
 // multiAddrString domain name or multi address string
 const multiAddrString = "/ip4/221.4.187.172/tcp/3456"
 
+var logger = logging.Logger("titan-client/blockservice")
+
 type blockService struct {
 	schedulerURL string
 }
 
-// newBlockService creates a BlockService with given datastore instance.
-func newBlockService() (*blockService, error) {
+// NewBlockService creates a BlockService with given datastore instance.
+func NewBlockService() (*blockService, error) {
 	bs := &blockService{}
 	urls, err := util.TransformationMultiAddrStringsToUrl(multiAddrString)
 	if err != nil {

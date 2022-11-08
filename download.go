@@ -5,29 +5,20 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	blocks "github.com/ipfs/go-block-format"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	md "github.com/ipfs/go-merkledag"
 	unixFile "github.com/ipfs/go-unixfs/file"
+	"github.com/timtide/titan-client/blockservice"
 	"github.com/timtide/titan-client/util"
 	"io"
 	gopath "path"
 )
 
-// DefaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.
-var DefaultBufSize = 1048576
+// defaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.
+const defaultBufSize = 1048576
 
 type Downloader interface {
-	// GetBlock gets the requested block.
-	GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error)
-
-	// GetBlocks The scheduler queries the corresponding
-	// edge node information according to the incoming value. Each value
-	// is assigned to the corresponding edge node for global optimization.
-	// schedule service mapping cid to edge node.
-	GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
-
 	// GetReader returns a read pipe
 	// note: remember to close after using
 	// eg: defer reader.close()
@@ -45,31 +36,12 @@ func NewDownloader() Downloader {
 
 type titanDownloader struct{}
 
-func (t *titanDownloader) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error) {
-	bs, err := newBlockService()
-	if err != nil {
-		return nil, err
-	}
-	return bs.GetBlock(ctx, c)
-}
-
-func (t *titanDownloader) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
-	ch := make(chan blocks.Block)
-	defer close(ch)
-	bs, err := newBlockService()
-	if err != nil {
-		logger.Error(err.Error())
-		return ch
-	}
-	return bs.GetBlocks(ctx, ks)
-}
-
 // GetReader returns a read pipe
 // note: remember to close after using
 // eg: defer reader.close()
 func (t *titanDownloader) GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
 	logger.Info("begin get reader with cid : ", cid.String())
-	bs, err := newBlockService()
+	bs, err := blockservice.NewBlockService()
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +92,7 @@ func fileArchive(f files.Node, name string, archive bool, compression int) (io.R
 	}
 
 	// use a buffered writer to parallelize task
-	bufWriter := bufio.NewWriterSize(pipeWriter, DefaultBufSize)
+	bufWriter := bufio.NewWriterSize(pipeWriter, defaultBufSize)
 
 	// compression determines whether to use gzip compression.
 	maybeGzw, err := newMaybeGzWriter(bufWriter, compression)

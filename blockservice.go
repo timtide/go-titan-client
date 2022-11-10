@@ -7,14 +7,19 @@ import (
 	"github.com/ipfs/go-cid"
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
 	exchange "github.com/ipfs/go-ipfs-exchange-interface"
-	"github.com/timtide/titan-client/blockdownload"
+	ipld "github.com/ipfs/go-ipld-format"
+	"github.com/timtide/titan-client/util"
 )
 
-type blockService struct{}
+type blockService struct {
+	customGatewayURL string
+}
 
-// NewBlockService creates a BlockService with given datastore instance.
-func NewBlockService() *blockService {
-	return &blockService{}
+// newBlockService creates a BlockService with given datastore instance.
+func newBlockService(url string) *blockService {
+	return &blockService{
+		customGatewayURL: url,
+	}
 }
 
 // Blockstore returns the blockstore behind this blockservice.
@@ -41,25 +46,25 @@ func (s *blockService) AddBlocks(ctx context.Context, bs []blocks.Block) error {
 // GetBlock retrieves a particular block from the service,
 // Getting it from the datastore using the key (hash).
 func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error) {
-	bg, err := blockdownload.NewBlockGetter()
+	if !c.Defined() {
+		return nil, ipld.ErrNotFound{Cid: c}
+	}
+	data, err := util.NewDataGetter().GetDataFromTitanOrGatewayByCid(ctx, s.customGatewayURL, c)
 	if err != nil {
 		return nil, err
 	}
-	return bg.GetBlock(ctx, c)
+	logger.Debug("block data download success")
+	block, err := blocks.NewBlockWithCid(data, c)
+	if err != nil {
+		return nil, err
+	}
+	return block, nil
 }
 
 // GetBlocks gets a list of blocks asynchronously and returns through
 // the returned channel.
-// NB: No guarantees are made about order.
 func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
-	ch := make(chan blocks.Block)
-	defer close(ch)
-	bg, err := blockdownload.NewBlockGetter()
-	if err != nil {
-		logger.Error(err.Error())
-		return ch
-	}
-	return bg.GetBlocks(ctx, ks)
+	return util.NewDataGetter().GetDataFromTitanOrGatewayByCids(ctx, s.customGatewayURL, ks)
 }
 
 // DeleteBlock deletes a block in the blockservice from the datastore

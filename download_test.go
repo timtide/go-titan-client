@@ -10,19 +10,29 @@ import (
 	"testing"
 )
 
+func TestNewDownloader(t *testing.T) {
+	downloader := NewDownloader(WithCustomGatewayUrlOption("http://127.0.0.1:5001"))
+	t.Log(downloader)
+}
+
 func TestTitanDownloader_Download(t *testing.T) {
 	err := logging.SetLogLevel(common.AppName, "DEBUG")
 	if err != nil {
 		t.Error(err.Error())
 		return
 	}
+	err = logging.SetLogLevel("titan-client/util", "DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	ctx := context.Background()
-	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
+	c, err := cid.Decode("QmTp2hEo8eXRp6wg7jXv1BLCMh5a4F3B7buAUZNZUu772j")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	err = NewDownloader().Download(ctx, c, false, gzip.NoCompression, "/Users/jason/data/tmp")
+	err = NewDownloader(WithCustomGatewayUrlOption("http://127.0.0.1:5001")).Download(ctx, c, false, gzip.NoCompression, "/Users/jason/data/tmp")
 	if err != nil {
 		t.Error(err.Error())
 		return

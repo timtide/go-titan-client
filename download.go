@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	logging "github.com/ipfs/go-log/v2"
@@ -14,7 +15,11 @@ import (
 	"github.com/timtide/titan-client/util"
 	"io"
 	gopath "path"
+	"strings"
 )
+
+// need scientific Internet access
+const defaultGatewayAddress = "https://ipfs.io/ipfs/"
 
 var logger = logging.Logger(common.AppName)
 
@@ -33,18 +38,30 @@ type Downloader interface {
 	Download(ctx context.Context, cid cid.Cid, archive bool, compressLevel int, outPath string) error
 }
 
-func NewDownloader() Downloader {
-	return &titanDownloader{}
+func NewDownloader(option ...Option) Downloader {
+	td := &titanDownloader{}
+	for _, v := range option {
+		v(td)
+	}
+	if td.customGatewayURL == "" {
+		td.customGatewayURL = defaultGatewayAddress
+	}
+	if strings.Contains(td.customGatewayURL, ":") {
+		td.customGatewayURL = fmt.Sprintf("%s%s%s", strings.TrimRight(td.customGatewayURL, "/"), common.RouteProtocol, "?arg=")
+	}
+	return td
 }
 
-type titanDownloader struct{}
+type titanDownloader struct {
+	customGatewayURL string
+}
 
 // GetReader returns a read pipe
 // note: remember to close after using
 // eg: defer reader.close()
 func (t *titanDownloader) GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
 	logger.Info("begin get reader with cid : ", cid.String())
-	bs := NewBlockService()
+	bs := newBlockService(t.customGatewayURL)
 	ds := md.NewDAGService(bs)
 	nd, err := ds.Get(ctx, cid)
 	if err != nil {

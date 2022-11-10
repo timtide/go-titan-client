@@ -71,5 +71,3 @@ require (
 	gorm.io/gorm v1.23.8 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
-
-// replace github.com/linguohua/titan v0.0.0-20221017122701-6d4941c28fd6 => github.com/LMF709268224/titan v1.0.0

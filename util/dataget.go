@@ -23,8 +23,8 @@ const defaultScheduleAddress = "http://39.108.143.56:5000/rpc/v0"
 type DataGetter interface {
 	GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error)
 	GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayURL string, c cid.Cid) ([]byte, error)
-	GetDataFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block
-	GetDataFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
+	GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block
+	GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
 }
 
 type dataGetter struct {
@@ -73,7 +73,7 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customG
 	return data, nil
 }
 
-func (d *dataGetter) GetDataFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block {
+func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block {
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
@@ -148,7 +148,7 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCids(ctx context.Context, custom
 	return ch
 }
 
-func (d *dataGetter) GetDataFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
+func (d *dataGetter) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)

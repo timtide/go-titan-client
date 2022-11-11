@@ -48,5 +48,5 @@ func (b *blockGetter) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, er
 
 func (b *blockGetter) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
 	logger.Debug("start batch download block")
-	return util.NewDataGetter().GetDataFromTitanByCids(ctx, ks)
+	return util.NewDataGetter().GetBlockFromTitanByCids(ctx, ks)
 }

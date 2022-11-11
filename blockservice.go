@@ -64,7 +64,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 // GetBlocks gets a list of blocks asynchronously and returns through
 // the returned channel.
 func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
-	return util.NewDataGetter().GetDataFromTitanOrGatewayByCids(ctx, s.customGatewayURL, ks)
+	return util.NewDataGetter().GetBlockFromTitanOrGatewayByCids(ctx, s.customGatewayURL, ks)
 }
 
 // DeleteBlock deletes a block in the blockservice from the datastore

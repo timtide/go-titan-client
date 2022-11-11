@@ -3,6 +3,7 @@ package blockdownload
 import (
 	"context"
 	"github.com/ipfs/go-cid"
+	logging "github.com/ipfs/go-log/v2"
 	"testing"
 )
 
@@ -28,12 +29,22 @@ var keys = []string{
 	"QmXHUgmFRhdGWMBmCs5RUaweGx45ts5akSbqk2pRLzx2U9",
 	"QmXBQLm519HnsjEhD1dugCvJS7pdoDMEquuy2nTL1ctHrc",
 	"QmYPAjzSMGtbR26swWbe7t7kfUFnC2pkcFtZofDUBpvBir",
-	"QmbUM7QfjZa9g58VduQ6PcN8cTYBYDtCaCSZ5Db4DsiN3P",
+	"bafkreiatncjyyxzjlneqyc6azcz5evhmcqq3zibf3y2zldikgtjb2lenoq",
 	"QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL",
 }
 
 func TestBlockGetter_GetBlock(t *testing.T) {
-	c, err := cid.Decode("QmTp2hEo8eXRp6wg7jXv1BLCMh5a4F3B7buAUZNZUu772j")
+	err := logging.SetLogLevel("titan-client/blockdownload", "DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	err = logging.SetLogLevel("titan-client/util", "DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	c, err := cid.Decode("bafkreiatncjyyxzjlneqyc6azcz5evhmcqq3zibf3y2zldikgtjb2lenoq")
 	if err != nil {
 		t.Error(err)
 		return
@@ -47,6 +58,16 @@ func TestBlockGetter_GetBlock(t *testing.T) {
 }
 
 func TestBlock_GetBlocks(t *testing.T) {
+	err := logging.SetLogLevel("titan-client/blockdownload", "DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	err = logging.SetLogLevel("titan-client/util", "DEBUG")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	t.Log("keys length : ", len(keys))
 	ks := make([]cid.Cid, 0, len(keys))
 	for _, v := range keys {

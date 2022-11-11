@@ -17,7 +17,7 @@ import (
 
 var logger = logging.Logger("titan-client/util")
 
-const defaultScheduleAddress = "http://221.4.187.172:3456/rpc/v0"
+const defaultScheduleAddress = "http://39.108.143.56:5000/rpc/v0"
 
 // DataGetter from titan or common gateway or local gateway to get data
 type DataGetter interface {
@@ -93,11 +93,12 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCids(ctx context.Context, custom
 			cs = append(cs, v.String())
 		}
 
-		mp, err := apiScheduler.GetDownloadInfoWithBlocks(ctx, cs)
+		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
 		if err != nil {
 			logger.Error(err.Error())
 			return
 		}
+		mp := UniformMapping(cidToEdges)
 		for _, v := range ks {
 			if _, ok := mp[v.String()]; !ok {
 				mp[v.String()] = api.DownloadInfo{}
@@ -112,9 +113,6 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCids(ctx context.Context, custom
 				continue
 			}
 			value := v
-			/*			if value.URL == "" || value.Token == "" {
-						continue
-					}*/
 
 			wg.Add(1)
 			go func(cc context.Context, c cid.Cid, df api.DownloadInfo) {
@@ -171,11 +169,12 @@ func (d *dataGetter) GetDataFromTitanByCids(ctx context.Context, ks []cid.Cid) <
 			cs = append(cs, v.String())
 		}
 
-		mp, err := apiScheduler.GetDownloadInfoWithBlocks(ctx, cs)
+		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
 		if err != nil {
 			logger.Error(err.Error())
 			return
 		}
+		mp := UniformMapping(cidToEdges)
 		for _, v := range ks {
 			if _, ok := mp[v.String()]; !ok {
 				mp[v.String()] = api.DownloadInfo{}
@@ -189,10 +188,6 @@ func (d *dataGetter) GetDataFromTitanByCids(ctx context.Context, ks []cid.Cid) <
 				continue
 			}
 			value := v
-			/*if value.URL == "" || value.Token == "" {
-				continue
-			}*/
-
 			wg.Add(1)
 			go func(cc context.Context, c cid.Cid, df api.DownloadInfo) {
 				defer wg.Done()

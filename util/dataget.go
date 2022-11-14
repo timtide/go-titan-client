@@ -9,15 +9,16 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/linguohua/titan/api"
 	"github.com/linguohua/titan/api/client"
-	"github.com/timtide/go-titan-client/common"
 	http2 "github.com/timtide/go-titan-client/util/http"
 	"strings"
 	"sync"
 )
 
-var logger = logging.Logger("titan-client/util")
+// todo: there is no domain name at present. Use IP first
+const defaultLocatorAddress = "http://39.108.143.56:5000/rpc/v0"
+const sdkName = "go-titan-client"
 
-const defaultScheduleAddress = "http://39.108.143.56:5000/rpc/v0"
+var logger = logging.Logger("titan-client/util")
 
 // DataGetter from titan or common gateway or local gateway to get data
 type DataGetter interface {
@@ -33,7 +34,7 @@ type dataGetter struct {
 
 func NewDataGetter() DataGetter {
 	return &dataGetter{
-		schedulerURL: defaultScheduleAddress,
+		schedulerURL: defaultLocatorAddress,
 	}
 }
 
@@ -222,7 +223,7 @@ func (d *dataGetter) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byt
 	}
 	logger.Debugf("get data from titan edge node [%s]", host)
 	url := fmt.Sprintf("%s%s%s", host, "?cid=", cid.String())
-	return http2.Get(url, token, common.AppName)
+	return http2.Get(url, token, sdkName)
 }
 
 func (d *dataGetter) getDataFromCommonGateway(customGatewayURL string, c cid.Cid) ([]byte, error) {

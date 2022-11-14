@@ -4,8 +4,9 @@ import (
 	"fmt"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr/net"
-	"github.com/timtide/go-titan-client/common"
 )
+
+const RPCProtocol = "/rpc/v0"
 
 // TransformationMultiAddrStringsToUrl multi format address transfer to url
 // eg: "/ip4/127.0.0.1/tcp/3456" => "http://127.0.0.1:3456/rpc/v0"
@@ -26,7 +27,7 @@ func TransformationMultiAddrStringsToUrl(multiAddrString string) (string, error)
 	// todo tcp6 ?
 	switch pt {
 	case "tcp4":
-		return fmt.Sprintf("%s%s%s%s", "http", "://", host, common.RPCProtocol), nil
+		return fmt.Sprintf("%s%s%s%s", "http", "://", host, RPCProtocol), nil
 	default:
 		return "", fmt.Errorf("unkown protocol type")
 	}

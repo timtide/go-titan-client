@@ -11,7 +11,6 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	md "github.com/ipfs/go-merkledag"
 	unixFile "github.com/ipfs/go-unixfs/file"
-	"github.com/timtide/go-titan-client/common"
 	"github.com/timtide/go-titan-client/util"
 	"io"
 	gopath "path"
@@ -20,8 +19,9 @@ import (
 
 // need scientific Internet access
 const defaultGatewayAddress = "https://ipfs.io/ipfs/"
+const RouteProtocol = "/api/v0/block/get"
 
-var logger = logging.Logger(common.AppName)
+var logger = logging.Logger("go-titan-client")
 
 // defaultBufSize is the buffer size for gets. for now, 1MiB, which is ~4 blocks.
 const defaultBufSize = 1048576
@@ -47,7 +47,7 @@ func NewDownloader(option ...Option) Downloader {
 		td.customGatewayURL = defaultGatewayAddress
 	}
 	if strings.Contains(td.customGatewayURL, ":") {
-		td.customGatewayURL = fmt.Sprintf("%s%s%s", strings.TrimRight(td.customGatewayURL, "/"), common.RouteProtocol, "?arg=")
+		td.customGatewayURL = fmt.Sprintf("%s%s%s", strings.TrimRight(td.customGatewayURL, "/"), RouteProtocol, "?arg=")
 	}
 	return td
 }

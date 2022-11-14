@@ -5,7 +5,6 @@ import (
 	"context"
 	"github.com/ipfs/go-cid"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/timtide/go-titan-client/common"
 	"github.com/timtide/go-titan-client/util"
 	"testing"
 )
@@ -16,12 +15,7 @@ func TestNewDownloader(t *testing.T) {
 }
 
 func TestTitanDownloader_Download(t *testing.T) {
-	err := logging.SetLogLevel(common.AppName, "DEBUG")
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-	err = logging.SetLogLevel("titan-client/util", "DEBUG")
+	err := logging.SetLogLevel("titan-client/util", "DEBUG")
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -41,12 +35,6 @@ func TestTitanDownloader_Download(t *testing.T) {
 }
 
 func TestTitanDownloader_GetReader(t *testing.T) {
-	// set log level
-	err := logging.SetLogLevel(common.AppName, "DEBUG")
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
 	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
 	if err != nil {
 		t.Error(err)

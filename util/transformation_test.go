@@ -38,29 +38,29 @@ var di10 = api.DownloadInfo{
 }
 
 var data1 = map[string][]api.DownloadInfo{
-	"cid1":  []api.DownloadInfo{di1, di2},
-	"cid2":  []api.DownloadInfo{di1, di3, di4},
-	"cid3":  []api.DownloadInfo{di1, di2},
-	"cid4":  []api.DownloadInfo{di1},
-	"cid5":  []api.DownloadInfo{di1, di2, di3, di4},
-	"cid6":  []api.DownloadInfo{di1, di2, di3, di5, di6, di7, di8, di9, di10},
-	"cid7":  []api.DownloadInfo{di1, di2, di3, di7, di8},
-	"cid8":  []api.DownloadInfo{di1, di2, di3, di9, di10},
-	"cid9":  []api.DownloadInfo{di1, di2, di3},
-	"cid10": []api.DownloadInfo{di1, di2, di5, di6},
+	"cid1":  {di1, di2},
+	"cid2":  {di1, di3, di4},
+	"cid3":  {di1, di2},
+	"cid4":  {di1},
+	"cid5":  {di1, di2, di3, di4},
+	"cid6":  {di1, di2, di3, di5, di6, di7, di8, di9, di10},
+	"cid7":  {di1, di2, di3, di7, di8},
+	"cid8":  {di1, di2, di3, di9, di10},
+	"cid9":  {di1, di2, di3},
+	"cid10": {di1, di2, di5, di6},
 }
 
 var data2 = map[string][]api.DownloadInfo{
-	"cid1":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid2":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid3":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid4":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid5":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid6":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid7":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid8":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid9":  []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
-	"cid10": []api.DownloadInfo{di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid1":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid2":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid3":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid4":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid5":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid6":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid7":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid8":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid9":  {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
+	"cid10": {di1, di2, di3, di4, di5, di6, di7, di8, di9, di10},
 }
 
 func TestTransfer(t *testing.T) {
@@ -69,6 +69,12 @@ func TestTransfer(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
-	res := UniformMapping(data2)
-	t.Log(res)
+	testData := []map[string][]api.DownloadInfo{
+		data1,
+		data2,
+	}
+	for _, v := range testData {
+		res := UniformMapping(v)
+		t.Log(res)
+	}
 }

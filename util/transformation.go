@@ -45,7 +45,7 @@ func UniformMapping(cidToEdges map[string][]api.DownloadInfo) map[string]api.Dow
 		cv := ring.currentValue()
 		cidStr := ""
 		edgeCounter := 0
-		for key, _ := range edgeToCids[cv.downloadInfo] {
+		for key := range edgeToCids[cv.downloadInfo] {
 			if edges, ok := cidToEdges[key]; ok {
 				if cidStr == "" {
 					// first

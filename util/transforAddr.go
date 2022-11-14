@@ -26,7 +26,7 @@ func TransformationMultiAddrStringsToUrl(multiAddrString string) (string, error)
 	// todo tcp6 ?
 	switch pt {
 	case "tcp4":
-		return fmt.Sprintf("%s%s%s", "http://", host, common.RPCProtocol), nil
+		return fmt.Sprintf("%s%s%s%s", "http", "://", host, common.RPCProtocol), nil
 	default:
 		return "", fmt.Errorf("unkown protocol type")
 	}

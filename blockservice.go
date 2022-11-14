@@ -8,7 +8,7 @@ import (
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
 	exchange "github.com/ipfs/go-ipfs-exchange-interface"
 	ipld "github.com/ipfs/go-ipld-format"
-	"github.com/timtide/titan-client/util"
+	"github.com/timtide/go-titan-client/util"
 )
 
 type blockService struct {

@@ -9,8 +9,8 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/linguohua/titan/api"
 	"github.com/linguohua/titan/api/client"
-	"github.com/timtide/titan-client/common"
-	http2 "github.com/timtide/titan-client/util/http"
+	"github.com/timtide/go-titan-client/common"
+	http2 "github.com/timtide/go-titan-client/util/http"
 	"strings"
 	"sync"
 )

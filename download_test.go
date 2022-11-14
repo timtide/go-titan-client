@@ -5,8 +5,8 @@ import (
 	"context"
 	"github.com/ipfs/go-cid"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/timtide/titan-client/common"
-	"github.com/timtide/titan-client/util"
+	"github.com/timtide/go-titan-client/common"
+	"github.com/timtide/go-titan-client/util"
 	"testing"
 )
 

@@ -1,4 +1,4 @@
-module github.com/timtide/titan-client
+module github.com/timtide/go-titan-client
 
 go 1.19
 

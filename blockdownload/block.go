@@ -6,7 +6,7 @@ import (
 	"github.com/ipfs/go-cid"
 	ipld "github.com/ipfs/go-ipld-format"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/timtide/titan-client/util"
+	"github.com/timtide/go-titan-client/util"
 )
 
 var logger = logging.Logger("titan-client/blockdownload")

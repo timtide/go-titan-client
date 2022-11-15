@@ -6,7 +6,9 @@ import (
 )
 
 // UniformMapping cid to many api.DownloadInfo mapping to cid to only one api.DownloadInfo
-// the cid is evenly distributed on the edge nodes
+// the cid is evenly distributed on the edge node
+// principle: the edge node with the fewest cid storage corresponds to the edge node with the fewest cid storage
+// summary: least first
 func UniformMapping(cidToEdges map[string][]api.DownloadInfo) map[string]api.DownloadInfo {
 	result := make(map[string]api.DownloadInfo)
 	// api.DownloadInfo mapping to many cid

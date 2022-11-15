@@ -57,11 +57,13 @@ func NewDataService(option ...DataOption) DataService {
 func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error) {
 	apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 	if err != nil {
+		logger.Error("create schedule fail : ", err.Error())
 		return nil, err
 	}
 	defer closer()
 	downloadInfo, err := apiScheduler.GetDownloadInfoWithBlock(ctx, c.String())
 	if err != nil {
+		logger.Error("get download info fail : ", err.Error())
 		return nil, err
 	}
 	if downloadInfo.URL == "" || downloadInfo.Token == "" {
@@ -69,6 +71,7 @@ func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]b
 	}
 	data, err := d.getDataFromEdgeNode(downloadInfo.URL, downloadInfo.Token, c)
 	if err != nil {
+		logger.Error("fail get data from edge nod : ", err.Error())
 		return nil, err
 	}
 	return data, nil
@@ -77,13 +80,12 @@ func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]b
 func (d *dataService) GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayAddr string, c cid.Cid) ([]byte, error) {
 	data, err := d.GetDataFromTitanByCid(ctx, c)
 	if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
-		logger.Warn(err.Error())
 		return nil, err
 	}
 	if data == nil {
 		data, err = d.getDataFromCommonGateway(customGatewayAddr, c)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("fail get data from gateway : ", err.Error())
 			return nil, err
 		}
 	}
@@ -97,6 +99,7 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 
 		apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 		if err != nil {
+			logger.Error("create schedule fail : ", err.Error())
 			return
 		}
 		defer closer()
@@ -108,7 +111,7 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 
 		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("get download infos fail : ", err.Error())
 			return
 		}
 		mp := UniformMapping(cidToEdges)
@@ -132,19 +135,19 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 				defer wg.Done()
 				data, err := d.getDataFromEdgeNode(df.URL, df.Token, c)
 				if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
-					logger.Error(err.Error())
+					logger.Error("fail get data from edge nod : ", err.Error())
 					return
 				}
 				if data == nil {
 					data, err = d.getDataFromCommonGateway(customGatewayAddr, c)
 					if err != nil {
-						logger.Error(err.Error())
+						logger.Error("fail get data from gateway : ", err.Error())
 						return
 					}
 				}
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
-					logger.Error(err.Error())
+					logger.Error("create block fail : ", err.Error())
 					return
 				}
 				select {
@@ -168,7 +171,7 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 
 		apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("create schedule fail : ", err.Error())
 			return
 		}
 		defer closer()
@@ -180,7 +183,7 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 
 		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("get download infos fail : ", err.Error())
 			return
 		}
 		mp := UniformMapping(cidToEdges)
@@ -202,12 +205,12 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 				defer wg.Done()
 				data, err := d.getDataFromEdgeNode(df.URL, df.Token, c)
 				if err != nil {
-					logger.Error(err.Error())
+					logger.Error("fail get data from edge nod : ", err.Error())
 					return
 				}
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
-					logger.Error(err.Error())
+					logger.Error("create block fail : ", err.Error())
 					return
 				}
 				select {

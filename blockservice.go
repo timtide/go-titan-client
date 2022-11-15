@@ -58,6 +58,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 	logger.Debug("block data download success")
 	block, err := blocks.NewBlockWithCid(data, c)
 	if err != nil {
+		logger.Error("create block fail : ", err.Error())
 		return nil, err
 	}
 	return block, nil

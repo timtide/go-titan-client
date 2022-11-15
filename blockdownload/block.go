@@ -40,7 +40,7 @@ func (b *blockGetter) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, er
 	if !c.Defined() {
 		return nil, ipld.ErrNotFound{Cid: c}
 	}
-	data, err := util.NewDataGetter(util.WithLocatorAddressOption(b.locatorAddr)).GetDataFromTitanByCid(ctx, c)
+	data, err := util.NewDataService(util.WithLocatorAddressOption(b.locatorAddr)).GetDataFromTitanByCid(ctx, c)
 	if err != nil {
 		return nil, err
 	}
@@ -54,5 +54,5 @@ func (b *blockGetter) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, er
 
 func (b *blockGetter) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
 	logger.Debug("start batch download block")
-	return util.NewDataGetter(util.WithLocatorAddressOption(b.locatorAddr)).GetBlockFromTitanByCids(ctx, ks)
+	return util.NewDataService(util.WithLocatorAddressOption(b.locatorAddr)).GetBlockFromTitanByCids(ctx, ks)
 }

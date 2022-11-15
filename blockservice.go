@@ -51,7 +51,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 	if !c.Defined() {
 		return nil, ipld.ErrNotFound{Cid: c}
 	}
-	data, err := util.NewDataGetter(util.WithLocatorAddressOption(s.locatorAddr)).GetDataFromTitanOrGatewayByCid(ctx, s.customGatewayAddr, c)
+	data, err := util.NewDataService(util.WithLocatorAddressOption(s.locatorAddr)).GetDataFromTitanOrGatewayByCid(ctx, s.customGatewayAddr, c)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 // GetBlocks gets a list of blocks asynchronously and returns through
 // the returned channel.
 func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
-	return util.NewDataGetter(util.WithLocatorAddressOption(s.locatorAddr)).GetBlockFromTitanOrGatewayByCids(ctx, s.customGatewayAddr, ks)
+	return util.NewDataService(util.WithLocatorAddressOption(s.locatorAddr)).GetBlockFromTitanOrGatewayByCids(ctx, s.customGatewayAddr, ks)
 }
 
 // DeleteBlock deletes a block in the blockservice from the datastore

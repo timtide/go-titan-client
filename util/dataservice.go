@@ -20,28 +20,28 @@ const sdkName = "go-titan-client"
 
 var logger = logging.Logger("titan-client/util")
 
-type DataOption func(*dataGetter)
+type DataOption func(*dataService)
 
 func WithLocatorAddressOption(locatorUrl string) DataOption {
-	return func(dg *dataGetter) {
+	return func(dg *dataService) {
 		dg.locatorAddr = locatorUrl
 	}
 }
 
-// DataGetter from titan or common gateway or local gateway to get data
-type DataGetter interface {
+// DataService from titan or common gateway or local gateway to get data
+type DataService interface {
 	GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error)
 	GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayURL string, c cid.Cid) ([]byte, error)
 	GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block
 	GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
 }
 
-type dataGetter struct {
+type dataService struct {
 	locatorAddr string
 }
 
-func NewDataGetter(option ...DataOption) DataGetter {
-	dg := &dataGetter{}
+func NewDataService(option ...DataOption) DataService {
+	dg := &dataService{}
 	for _, v := range option {
 		v(dg)
 	}
@@ -54,7 +54,7 @@ func NewDataGetter(option ...DataOption) DataGetter {
 	return dg
 }
 
-func (d *dataGetter) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error) {
+func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error) {
 	apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (d *dataGetter) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]by
 	return data, nil
 }
 
-func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayAddr string, c cid.Cid) ([]byte, error) {
+func (d *dataService) GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayAddr string, c cid.Cid) ([]byte, error) {
 	data, err := d.GetDataFromTitanByCid(ctx, c)
 	if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
 		logger.Warn(err.Error())
@@ -90,7 +90,7 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customG
 	return data, nil
 }
 
-func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayAddr string, ks []cid.Cid) <-chan blocks.Block {
+func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayAddr string, ks []cid.Cid) <-chan blocks.Block {
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
@@ -161,7 +161,7 @@ func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, custo
 	return ch
 }
 
-func (d *dataGetter) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
+func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
@@ -225,7 +225,7 @@ func (d *dataGetter) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) 
 }
 
 // getDataFromEdgeNode connect Titan net by http get method
-func (d *dataGetter) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byte, error) {
+func (d *dataService) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byte, error) {
 	if host == "" || token == "" {
 		return nil, fmt.Errorf("not found target host")
 	}
@@ -234,7 +234,7 @@ func (d *dataGetter) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byt
 	return http2.Get(url, token, sdkName)
 }
 
-func (d *dataGetter) getDataFromCommonGateway(customGatewayAddr string, c cid.Cid) ([]byte, error) {
+func (d *dataService) getDataFromCommonGateway(customGatewayAddr string, c cid.Cid) ([]byte, error) {
 	if customGatewayAddr == "" {
 		return nil, fmt.Errorf("not found target host")
 	}

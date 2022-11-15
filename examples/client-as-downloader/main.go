@@ -10,12 +10,12 @@ import (
 
 func main() {
 	ctx := context.Background()
-	c, err := cid.Decode("bafybeiglv5lkp2uwrhpwtfixn2gtu7w62yorckmfxac3jphys2q267plwa")
+	c, err := cid.Decode("QmUbaDBz6YKn3dVzoKrLDyupMmyWk5am2QSdgfKsU1RN3N")
 	if err != nil {
 		panic(err.Error())
 	}
 	d := titan_client.NewDownloader(titan_client.WithCustomGatewayUrlOption("http://127.0.0.1:5001"))
-	err = d.Download(ctx, c, false, gzip.NoCompression, "/Users/jason/data/tmp")
+	err = d.Download(ctx, c, false, gzip.NoCompression, "./titan.mp4")
 	if err != nil {
 		panic(err.Error())
 	}

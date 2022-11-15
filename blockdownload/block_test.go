@@ -35,7 +35,7 @@ func TestBlockGetter_GetBlock(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	block, err := NewBlockGetter().GetBlock(context.Background(), c)
+	block, err := NewBlockGetter(WithLocatorUrlOption("http://221.4.187.172:3456")).GetBlock(context.Background(), c)
 	if err != nil {
 		t.Error(err.Error())
 		return

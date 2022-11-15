@@ -43,17 +43,18 @@ func NewDownloader(option ...Option) Downloader {
 	for _, v := range option {
 		v(td)
 	}
-	if td.customGatewayURL == "" {
-		td.customGatewayURL = defaultGatewayAddress
+	if td.customGatewayAddr == "" {
+		td.customGatewayAddr = defaultGatewayAddress
 	}
-	if strings.Contains(td.customGatewayURL, ":") {
-		td.customGatewayURL = fmt.Sprintf("%s%s%s", strings.TrimRight(td.customGatewayURL, "/"), RouteProtocol, "?arg=")
+	if strings.Contains(td.customGatewayAddr, ":") {
+		td.customGatewayAddr = fmt.Sprintf("%s%s%s", strings.TrimRight(td.customGatewayAddr, "/"), RouteProtocol, "?arg=")
 	}
 	return td
 }
 
 type titanDownloader struct {
-	customGatewayURL string
+	customGatewayAddr string
+	locatorAddr       string
 }
 
 // GetReader returns a read pipe
@@ -61,7 +62,7 @@ type titanDownloader struct {
 // eg: defer reader.close()
 func (t *titanDownloader) GetReader(ctx context.Context, cid cid.Cid, archive bool, compressLevel int) (io.ReadCloser, error) {
 	logger.Info("begin get reader with cid : ", cid.String())
-	bs := newBlockService(t.customGatewayURL)
+	bs := newBlockService(t.customGatewayAddr, t.locatorAddr)
 	ds := md.NewDAGService(bs)
 	nd, err := ds.Get(ctx, cid)
 	if err != nil {

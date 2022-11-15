@@ -12,13 +12,15 @@ import (
 )
 
 type blockService struct {
-	customGatewayURL string
+	customGatewayAddr string
+	locatorAddr       string
 }
 
 // newBlockService creates a BlockService with given datastore instance.
-func newBlockService(url string) *blockService {
+func newBlockService(customGatewayAddr, locatorAddr string) *blockService {
 	return &blockService{
-		customGatewayURL: url,
+		customGatewayAddr: customGatewayAddr,
+		locatorAddr:       locatorAddr,
 	}
 }
 
@@ -49,7 +51,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 	if !c.Defined() {
 		return nil, ipld.ErrNotFound{Cid: c}
 	}
-	data, err := util.NewDataGetter().GetDataFromTitanOrGatewayByCid(ctx, s.customGatewayURL, c)
+	data, err := util.NewDataGetter(util.WithLocatorAddressOption(s.locatorAddr)).GetDataFromTitanOrGatewayByCid(ctx, s.customGatewayAddr, c)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +66,7 @@ func (s *blockService) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, e
 // GetBlocks gets a list of blocks asynchronously and returns through
 // the returned channel.
 func (s *blockService) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
-	return util.NewDataGetter().GetBlockFromTitanOrGatewayByCids(ctx, s.customGatewayURL, ks)
+	return util.NewDataGetter(util.WithLocatorAddressOption(s.locatorAddr)).GetBlockFromTitanOrGatewayByCids(ctx, s.customGatewayAddr, ks)
 }
 
 // DeleteBlock deletes a block in the blockservice from the datastore

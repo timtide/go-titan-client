@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewDownloader(t *testing.T) {
-	downloader := NewDownloader(WithCustomGatewayUrlOption("http://127.0.0.1:5001"))
+	downloader := NewDownloader(WithCustomGatewayAddressOption("http://127.0.0.1:5001"), WithLocatorAddressOption(""))
 	t.Log(downloader)
 }
 
@@ -21,12 +21,13 @@ func TestTitanDownloader_Download(t *testing.T) {
 		return
 	}
 	ctx := context.Background()
-	c, err := cid.Decode("bafybeiglv5lkp2uwrhpwtfixn2gtu7w62yorckmfxac3jphys2q267plwa")
+	c, err := cid.Decode("QmUbaDBz6YKn3dVzoKrLDyupMmyWk5am2QSdgfKsU1RN3N")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	err = NewDownloader(WithCustomGatewayUrlOption("http://127.0.0.1:5001")).Download(ctx, c, false, gzip.NoCompression, "/Users/jason/data/tmp")
+	downloader := NewDownloader(WithCustomGatewayAddressOption("http://127.0.0.1:5001"))
+	err = downloader.Download(ctx, c, false, gzip.NoCompression, "./titan.mp4")
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -35,7 +36,7 @@ func TestTitanDownloader_Download(t *testing.T) {
 }
 
 func TestTitanDownloader_GetReader(t *testing.T) {
-	c, err := cid.Decode("QmajjF2D13CsreihRsWsDicraMh2nXFmBLXKoF5MNBRAyL")
+	c, err := cid.Decode("QmPgaP4SiadmrtFzEVY5aGTCRou5vbMDJCgEaJwuN9Lk4H")
 	if err != nil {
 		t.Error(err)
 		return
@@ -52,7 +53,7 @@ func TestTitanDownloader_GetReader(t *testing.T) {
 		Compression: gzip.NoCompression,
 	}
 
-	err = ow.Write(reader, "/Users/jason/data/tmp")
+	err = ow.Write(reader, "./")
 	if err != nil {
 		t.Error(err)
 		return

@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	d := titan_client.NewDownloader(titan_client.WithCustomGatewayUrlOption("http://127.0.0.1:5001"))
+	d := titan_client.NewDownloader(titan_client.WithCustomGatewayAddressOption("http://127.0.0.1:5001"))
 	err = d.Download(ctx, c, false, gzip.NoCompression, "./titan.mp4")
 	if err != nil {
 		panic(err.Error())

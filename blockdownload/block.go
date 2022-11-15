@@ -23,18 +23,24 @@ type BlockGetter interface {
 	GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block
 }
 
-func NewBlockGetter() BlockGetter {
-	return &blockGetter{}
+func NewBlockGetter(option ...Option) BlockGetter {
+	bg := &blockGetter{}
+	for _, v := range option {
+		v(bg)
+	}
+	return bg
 }
 
-type blockGetter struct{}
+type blockGetter struct {
+	locatorAddr string
+}
 
 func (b *blockGetter) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, error) {
 	logger.Debugf("get block with cid [%s]", c.String())
 	if !c.Defined() {
 		return nil, ipld.ErrNotFound{Cid: c}
 	}
-	data, err := util.NewDataGetter().GetDataFromTitanByCid(ctx, c)
+	data, err := util.NewDataGetter(util.WithLocatorAddressOption(b.locatorAddr)).GetDataFromTitanByCid(ctx, c)
 	if err != nil {
 		return nil, err
 	}
@@ -48,5 +54,5 @@ func (b *blockGetter) GetBlock(ctx context.Context, c cid.Cid) (blocks.Block, er
 
 func (b *blockGetter) GetBlocks(ctx context.Context, ks []cid.Cid) <-chan blocks.Block {
 	logger.Debug("start batch download block")
-	return util.NewDataGetter().GetBlockFromTitanByCids(ctx, ks)
+	return util.NewDataGetter(util.WithLocatorAddressOption(b.locatorAddr)).GetBlockFromTitanByCids(ctx, ks)
 }

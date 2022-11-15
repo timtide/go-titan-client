@@ -20,6 +20,14 @@ const sdkName = "go-titan-client"
 
 var logger = logging.Logger("titan-client/util")
 
+type DataOption func(*dataGetter)
+
+func WithLocatorAddressOption(locatorUrl string) DataOption {
+	return func(dg *dataGetter) {
+		dg.locatorAddr = locatorUrl
+	}
+}
+
 // DataGetter from titan or common gateway or local gateway to get data
 type DataGetter interface {
 	GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error)
@@ -29,17 +37,25 @@ type DataGetter interface {
 }
 
 type dataGetter struct {
-	schedulerURL string
+	locatorAddr string
 }
 
-func NewDataGetter() DataGetter {
-	return &dataGetter{
-		schedulerURL: defaultLocatorAddress,
+func NewDataGetter(option ...DataOption) DataGetter {
+	dg := &dataGetter{}
+	for _, v := range option {
+		v(dg)
 	}
+	if dg.locatorAddr == "" {
+		dg.locatorAddr = defaultLocatorAddress
+	}
+	if !strings.HasSuffix(dg.locatorAddr, "/rpc/v0") {
+		dg.locatorAddr = fmt.Sprintf("%s%s", dg.locatorAddr, "/rpc/v0")
+	}
+	return dg
 }
 
 func (d *dataGetter) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]byte, error) {
-	apiScheduler, closer, err := client.NewScheduler(ctx, d.schedulerURL, nil)
+	apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,14 +74,14 @@ func (d *dataGetter) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]by
 	return data, nil
 }
 
-func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayURL string, c cid.Cid) ([]byte, error) {
+func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customGatewayAddr string, c cid.Cid) ([]byte, error) {
 	data, err := d.GetDataFromTitanByCid(ctx, c)
 	if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
 		logger.Warn(err.Error())
 		return nil, err
 	}
 	if data == nil {
-		data, err = d.getDataFromCommonGateway(customGatewayURL, c)
+		data, err = d.getDataFromCommonGateway(customGatewayAddr, c)
 		if err != nil {
 			logger.Error(err.Error())
 			return nil, err
@@ -74,12 +90,12 @@ func (d *dataGetter) GetDataFromTitanOrGatewayByCid(ctx context.Context, customG
 	return data, nil
 }
 
-func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayURL string, ks []cid.Cid) <-chan blocks.Block {
+func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, customGatewayAddr string, ks []cid.Cid) <-chan blocks.Block {
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
 
-		apiScheduler, closer, err := client.NewScheduler(ctx, d.schedulerURL, nil)
+		apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 		if err != nil {
 			return
 		}
@@ -120,7 +136,7 @@ func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, custo
 					return
 				}
 				if data == nil {
-					data, err = d.getDataFromCommonGateway(customGatewayURL, c)
+					data, err = d.getDataFromCommonGateway(customGatewayAddr, c)
 					if err != nil {
 						logger.Error(err.Error())
 						return
@@ -150,7 +166,7 @@ func (d *dataGetter) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) 
 	go func() {
 		defer close(ch)
 
-		apiScheduler, closer, err := client.NewScheduler(ctx, d.schedulerURL, nil)
+		apiScheduler, closer, err := client.NewScheduler(ctx, d.locatorAddr, nil)
 		if err != nil {
 			logger.Error(err.Error())
 			return
@@ -218,11 +234,11 @@ func (d *dataGetter) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byt
 	return http2.Get(url, token, sdkName)
 }
 
-func (d *dataGetter) getDataFromCommonGateway(customGatewayURL string, c cid.Cid) ([]byte, error) {
-	if customGatewayURL == "" {
+func (d *dataGetter) getDataFromCommonGateway(customGatewayAddr string, c cid.Cid) ([]byte, error) {
+	if customGatewayAddr == "" {
 		return nil, fmt.Errorf("not found target host")
 	}
 	logger.Debugf("get data from common gateway with cid [%s]", c.String())
-	url := fmt.Sprintf("%s%s", customGatewayURL, c.String())
+	url := fmt.Sprintf("%s%s", customGatewayAddr, c.String())
 	return http2.PostFromGateway(url)
 }

@@ -79,10 +79,6 @@ func (d *dataGetter) GetBlockFromTitanOrGatewayByCids(ctx context.Context, custo
 	go func() {
 		defer close(ch)
 
-		if len(ks) == 0 || ks == nil {
-			return
-		}
-
 		apiScheduler, closer, err := client.NewScheduler(ctx, d.schedulerURL, nil)
 		if err != nil {
 			return
@@ -153,10 +149,6 @@ func (d *dataGetter) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid) 
 	ch := make(chan blocks.Block)
 	go func() {
 		defer close(ch)
-
-		if len(ks) == 0 || ks == nil {
-			return
-		}
 
 		apiScheduler, closer, err := client.NewScheduler(ctx, d.schedulerURL, nil)
 		if err != nil {

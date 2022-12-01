@@ -265,7 +265,7 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 	return ch
 }
 
-// getDataFromEdgeNode connect Titan net by http get method
+// getDataFromEdgeNode connect Titan edge node by http get method
 func (d *dataService) getDataFromEdgeNode(di api.DownloadInfoResult, cid cid.Cid) ([]byte, error) {
 	if di.URL == "" || di.Sign == "" {
 		return nil, fmt.Errorf("not found target host")

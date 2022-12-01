@@ -83,10 +83,10 @@ func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]b
 		if strings.Contains(strings.ToLower(err.Error()), "not found") {
 			return nil, err
 		}
-		go callback(ctx, c, apiScheduler, downloadInfo.SN, false)
+		go callback(c, apiScheduler, downloadInfo.SN, false)
 		return nil, err
 	}
-	go callback(ctx, c, apiScheduler, downloadInfo.SN, true)
+	go callback(c, apiScheduler, downloadInfo.SN, true)
 	return data, nil
 }
 
@@ -159,7 +159,7 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 				data, err := d.getDataFromEdgeNode(df, c)
 				if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
 					logger.Warn("fail get data from edge nod : ", err.Error())
-					go callback(ctx, c, apiScheduler, df.SN, false)
+					go callback(c, apiScheduler, df.SN, false)
 				}
 
 				if data == nil {
@@ -169,7 +169,7 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 						return
 					}
 				} else {
-					go callback(ctx, c, apiScheduler, df.SN, true)
+					go callback(c, apiScheduler, df.SN, true)
 				}
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
@@ -244,10 +244,10 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 					if strings.Contains(strings.ToLower(err.Error()), "not found") {
 						return
 					}
-					go callback(ctx, c, apiScheduler, df.SN, false)
+					go callback(c, apiScheduler, df.SN, false)
 					return
 				}
-				go callback(ctx, c, apiScheduler, df.SN, true)
+				go callback(c, apiScheduler, df.SN, true)
 
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
@@ -292,10 +292,12 @@ func (d *dataService) getDataFromCommonGateway(customGatewayAddr string, c cid.C
 	return http2.PostFromGateway(url)
 }
 
-func callback(ctx context.Context, c cid.Cid, apiScheduler api.Scheduler, sn int64, downloadSuccess bool) {
-	ctx = context.Background()
+func callback(c cid.Cid, apiScheduler api.Scheduler, sn int64, downloadSuccess bool) {
 	// give up the CPU, download first
 	runtime.Gosched()
+
+	logger.Debugf("[%s] downlaod state : %v", c.String(), downloadSuccess)
+
 	cidSign, err := GetSigner().Sign([]byte(c.String()))
 	if err != nil {
 		logger.Warn("cid sign fail : ", err.Error())
@@ -307,10 +309,12 @@ func callback(ctx context.Context, c cid.Cid, apiScheduler api.Scheduler, sn int
 			Result: downloadSuccess,
 		},
 	}
-	logger.Debugf("user download result : %v", bdResult)
-	err = apiScheduler.UserDownloadBlockResults(ctx, bdResult)
+
+	err = apiScheduler.UserDownloadBlockResults(context.TODO(), bdResult)
 	if err != nil {
-		logger.Warn("block download result callback fail : ", err.Error())
+		logger.Warnf("[%s] download callback fail : %s", c.String(), err.Error())
 		return
 	}
+
+	logger.Debugf("[%s] downlaod callback success", c.String())
 }

@@ -1,0 +1,25 @@
+name: auto test
+on:
+  push:
+    branches:
+      - master
+jobs:
+  my_first_job:
+    name: My first job
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: timtide/go-titan-client@master
+      - name: Run a single-line script
+        run: go test -v ./util/sign_test.go ./util/sign.go
+  my_second_job:
+    name: My second job
+    runs-on: macos-latest
+    steps:
+      - name: Run a multi-line script
+        env:
+          MY_VAR: Hello World!
+          MY_NAME: P3TERX
+        run: |
+          echo $MY_VAR
+          echo My name is $MY_NAME

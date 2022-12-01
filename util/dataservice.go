@@ -64,8 +64,7 @@ func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]b
 	}
 	defer closer()
 
-	signer := GetSigner()
-	publicKey := signer.GetPublicKey()
+	publicKey := GetSigner().GetPublicKey()
 	X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
 	publicKeyPem := pem.EncodeToMemory(
 		&pem.Block{
@@ -122,8 +121,7 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 			cs = append(cs, v.String())
 		}
 
-		signer := GetSigner()
-		publicKey := signer.GetPublicKey()
+		publicKey := GetSigner().GetPublicKey()
 		X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
 		publicKeyPem := pem.EncodeToMemory(
 			&pem.Block{
@@ -207,8 +205,7 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 			cs = append(cs, v.String())
 		}
 
-		signer := GetSigner()
-		publicKey := signer.GetPublicKey()
+		publicKey := GetSigner().GetPublicKey()
 		X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
 		publicKeyPem := pem.EncodeToMemory(
 			&pem.Block{
@@ -287,7 +284,7 @@ func (d *dataService) getDataFromCommonGateway(customGatewayAddr string, c cid.C
 	if customGatewayAddr == "" {
 		return nil, fmt.Errorf("not found target host")
 	}
-	logger.Debugf("get data from common gateway with cid [%s]", c.String())
+	logger.Debugf("got data from common gateway with cid [%s]", c.String())
 	url := fmt.Sprintf("%s%s", customGatewayAddr, c.String())
 	return http2.PostFromGateway(url)
 }

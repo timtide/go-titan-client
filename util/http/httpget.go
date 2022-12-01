@@ -11,15 +11,13 @@ import (
 // url: url
 // token: token
 // appName: use of scheduler tracking information, optional
-func Get(url, token, appName string) ([]byte, error) {
+func Get(url, appName string) ([]byte, error) {
 	client := &http.Client{Timeout: 30 * time.Second}
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// set request header, eg: token
-	request.Header.Set("Token", token)
 	request.Header.Set("App-Name", appName)
 
 	// request do

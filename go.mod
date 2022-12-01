@@ -14,7 +14,6 @@ require (
 	github.com/ipfs/go-unixfs v0.4.1
 	github.com/ipfs/tar-utils v0.0.2
 	github.com/linguohua/titan v0.0.0-20221103041228-34cdc2c2678d
-	github.com/multiformats/go-multiaddr v0.7.0
 )
 
 require (
@@ -42,14 +41,13 @@ require (
 	github.com/ipld/go-codec-dagpb v1.5.0 // indirect
 	github.com/ipld/go-ipld-prime v0.18.0 // indirect
 	github.com/jbenet/goprocess v0.1.4 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.14 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.0.4 // indirect
 	github.com/multiformats/go-base36 v0.1.0 // indirect
+	github.com/multiformats/go-multiaddr v0.7.0 // indirect
 	github.com/multiformats/go-multibase v0.1.1 // indirect
 	github.com/multiformats/go-multihash v0.2.1 // indirect
 	github.com/multiformats/go-varint v0.0.6 // indirect
@@ -68,6 +66,7 @@ require (
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gorm.io/gorm v1.23.8 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
+
+replace github.com/linguohua/titan v0.0.0-20221103041228-34cdc2c2678d => github.com/zscboy/titan-ultra-network v0.0.0-20221130073533-ff69f35b8c97

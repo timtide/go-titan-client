@@ -2,7 +2,8 @@ package util
 
 import (
 	"context"
-	"errors"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	blocks "github.com/ipfs/go-block-format"
 	"github.com/ipfs/go-cid"
@@ -10,6 +11,7 @@ import (
 	"github.com/linguohua/titan/api"
 	"github.com/linguohua/titan/api/client"
 	http2 "github.com/timtide/go-titan-client/util/http"
+	"runtime"
 	"strings"
 	"sync"
 )
@@ -61,19 +63,30 @@ func (d *dataService) GetDataFromTitanByCid(ctx context.Context, c cid.Cid) ([]b
 		return nil, err
 	}
 	defer closer()
-	downloadInfo, err := apiScheduler.GetDownloadInfoWithBlock(ctx, c.String())
+
+	signer := GetSigner()
+	publicKey := signer.GetPublicKey()
+	X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
+	publicKeyPem := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "RSA PUBLIC KEY",
+			Bytes: X509PublicKey,
+		})
+	downloadInfo, err := apiScheduler.GetDownloadInfoWithBlock(ctx, c.String(), string(publicKeyPem))
 	if err != nil {
 		logger.Error("get download info fail : ", err.Error())
 		return nil, err
 	}
-	if downloadInfo.URL == "" || downloadInfo.Token == "" {
-		return nil, errors.New("data not fount")
-	}
-	data, err := d.getDataFromEdgeNode(downloadInfo.URL, downloadInfo.Token, c)
+
+	data, err := d.getDataFromEdgeNode(downloadInfo, c)
 	if err != nil {
-		logger.Error("fail get data from edge nod : ", err.Error())
+		if strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return nil, err
+		}
+		go callback(ctx, c, apiScheduler, downloadInfo.SN, false)
 		return nil, err
 	}
+	go callback(ctx, c, apiScheduler, downloadInfo.SN, true)
 	return data, nil
 }
 
@@ -109,15 +122,24 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 			cs = append(cs, v.String())
 		}
 
-		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
+		signer := GetSigner()
+		publicKey := signer.GetPublicKey()
+		X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
+		publicKeyPem := pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "RSA PUBLIC KEY",
+				Bytes: X509PublicKey,
+			})
+		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs, string(publicKeyPem))
 		if err != nil {
 			logger.Error("get download infos fail : ", err.Error())
 			return
 		}
+
 		mp := UniformMapping(cidToEdges)
 		for _, v := range ks {
 			if _, ok := mp[v.String()]; !ok {
-				mp[v.String()] = api.DownloadInfo{}
+				mp[v.String()] = api.DownloadInfoResult{}
 			}
 		}
 
@@ -131,19 +153,23 @@ func (d *dataService) GetBlockFromTitanOrGatewayByCids(ctx context.Context, cust
 			value := v
 
 			wg.Add(1)
-			go func(cc context.Context, c cid.Cid, df api.DownloadInfo) {
+			go func(cc context.Context, c cid.Cid, df api.DownloadInfoResult) {
 				defer wg.Done()
-				data, err := d.getDataFromEdgeNode(df.URL, df.Token, c)
+
+				data, err := d.getDataFromEdgeNode(df, c)
 				if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
-					logger.Error("fail get data from edge nod : ", err.Error())
-					return
+					logger.Warn("fail get data from edge nod : ", err.Error())
+					go callback(ctx, c, apiScheduler, df.SN, false)
 				}
+
 				if data == nil {
 					data, err = d.getDataFromCommonGateway(customGatewayAddr, c)
 					if err != nil {
 						logger.Error("fail get data from gateway : ", err.Error())
 						return
 					}
+				} else {
+					go callback(ctx, c, apiScheduler, df.SN, true)
 				}
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
@@ -181,7 +207,15 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 			cs = append(cs, v.String())
 		}
 
-		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs)
+		signer := GetSigner()
+		publicKey := signer.GetPublicKey()
+		X509PublicKey := x509.MarshalPKCS1PublicKey(&publicKey)
+		publicKeyPem := pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "RSA PUBLIC KEY",
+				Bytes: X509PublicKey,
+			})
+		cidToEdges, err := apiScheduler.GetDownloadInfosWithBlocks(ctx, cs, string(publicKeyPem))
 		if err != nil {
 			logger.Error("get download infos fail : ", err.Error())
 			return
@@ -189,7 +223,7 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 		mp := UniformMapping(cidToEdges)
 		for _, v := range ks {
 			if _, ok := mp[v.String()]; !ok {
-				mp[v.String()] = api.DownloadInfo{}
+				mp[v.String()] = api.DownloadInfoResult{}
 			}
 		}
 		var wg sync.WaitGroup
@@ -201,13 +235,20 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 			}
 			value := v
 			wg.Add(1)
-			go func(cc context.Context, c cid.Cid, df api.DownloadInfo) {
+			go func(cc context.Context, c cid.Cid, df api.DownloadInfoResult) {
 				defer wg.Done()
-				data, err := d.getDataFromEdgeNode(df.URL, df.Token, c)
+
+				data, err := d.getDataFromEdgeNode(df, c)
 				if err != nil {
-					logger.Error("fail get data from edge nod : ", err.Error())
+					logger.Error("fail get data from edge node : ", err.Error())
+					if strings.Contains(strings.ToLower(err.Error()), "not found") {
+						return
+					}
+					go callback(ctx, c, apiScheduler, df.SN, false)
 					return
 				}
+				go callback(ctx, c, apiScheduler, df.SN, true)
+
 				block, err := blocks.NewBlockWithCid(data, c)
 				if err != nil {
 					logger.Error("create block fail : ", err.Error())
@@ -228,13 +269,18 @@ func (d *dataService) GetBlockFromTitanByCids(ctx context.Context, ks []cid.Cid)
 }
 
 // getDataFromEdgeNode connect Titan net by http get method
-func (d *dataService) getDataFromEdgeNode(host, token string, cid cid.Cid) ([]byte, error) {
-	if host == "" || token == "" {
+func (d *dataService) getDataFromEdgeNode(di api.DownloadInfoResult, cid cid.Cid) ([]byte, error) {
+	if di.URL == "" || di.Sign == "" {
 		return nil, fmt.Errorf("not found target host")
 	}
-	logger.Debugf("get data from titan edge node [%s]", host)
-	url := fmt.Sprintf("%s%s%s", host, "?cid=", cid.String())
-	return http2.Get(url, token, sdkName)
+	url := fmt.Sprintf("%s?cid=%s&sign=%s&sn=%d&signTime=%d&timeout=%d",
+		di.URL,
+		cid.String(),
+		di.Sign,
+		di.SN,
+		di.SignTime,
+		di.TimeOut)
+	return http2.Get(url, sdkName)
 }
 
 func (d *dataService) getDataFromCommonGateway(customGatewayAddr string, c cid.Cid) ([]byte, error) {
@@ -244,4 +290,27 @@ func (d *dataService) getDataFromCommonGateway(customGatewayAddr string, c cid.C
 	logger.Debugf("get data from common gateway with cid [%s]", c.String())
 	url := fmt.Sprintf("%s%s", customGatewayAddr, c.String())
 	return http2.PostFromGateway(url)
+}
+
+func callback(ctx context.Context, c cid.Cid, apiScheduler api.Scheduler, sn int64, downloadSuccess bool) {
+	ctx = context.Background()
+	// give up the CPU, download first
+	runtime.Gosched()
+	cidSign, err := GetSigner().Sign([]byte(c.String()))
+	if err != nil {
+		logger.Warn("cid sign fail : ", err.Error())
+		return
+	}
+	bdResult := []api.UserBlockDownloadResult{
+		{SN: sn,
+			Sign:   cidSign,
+			Result: downloadSuccess,
+		},
+	}
+	logger.Debugf("user download result : %v", bdResult)
+	err = apiScheduler.UserDownloadBlockResults(ctx, bdResult)
+	if err != nil {
+		logger.Warn("block download result callback fail : ", err.Error())
+		return
+	}
 }

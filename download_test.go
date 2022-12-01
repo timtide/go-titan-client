@@ -26,7 +26,7 @@ func TestTitanDownloader_Download(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	downloader := NewDownloader(WithCustomGatewayAddressOption("http://127.0.0.1:5001"))
+	downloader := NewDownloader(WithCustomGatewayAddressOption("http://127.0.0.1:5001"), WithLocatorAddressOption("http://192.168.0.26:6789"))
 	err = downloader.Download(ctx, c, false, gzip.NoCompression, "./titan.mp4")
 	if err != nil {
 		t.Error(err.Error())

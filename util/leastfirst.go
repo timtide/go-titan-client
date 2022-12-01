@@ -9,10 +9,10 @@ import (
 // the cid is evenly distributed on the edge node
 // principle: the edge node with the fewest cid storage corresponds to the edge node with the fewest cid storage
 // summary: least first
-func UniformMapping(cidToEdges map[string][]api.DownloadInfo) map[string]api.DownloadInfo {
-	result := make(map[string]api.DownloadInfo)
+func UniformMapping(cidToEdges map[string][]api.DownloadInfoResult) map[string]api.DownloadInfoResult {
+	result := make(map[string]api.DownloadInfoResult)
 	// api.DownloadInfo mapping to many cid
-	edgeToCids := make(map[api.DownloadInfo]map[string]struct{})
+	edgeToCids := make(map[api.DownloadInfoResult]map[string]struct{})
 
 	for key, downloadInfos := range cidToEdges {
 		for _, downloadInfo := range downloadInfos {
@@ -72,7 +72,7 @@ func UniformMapping(cidToEdges map[string][]api.DownloadInfo) map[string]api.Dow
 }
 
 type downloadInfoCounter struct {
-	downloadInfo api.DownloadInfo
+	downloadInfo api.DownloadInfoResult
 	counter      int
 }
 
